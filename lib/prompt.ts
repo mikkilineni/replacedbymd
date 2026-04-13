@@ -54,22 +54,22 @@ Return ONLY this JSON (no markdown, no fences, start with {):
     "headline": "Bloomberg-style crash headline"
   },
   "whatLeaked": {
-    "prose": "2-3 paragraphs first-person voice clone, 2am honest, real industry terms",
-    "coreTruths": ["4-5 brutally specific first-person bullets"]
+    "prose": "1-2 paragraphs first-person voice clone, 2am honest, real industry terms",
+    "coreTruths": ["3-4 brutally specific first-person bullets"]
   },
   "retirement": {
     "pension": "What they leave with (specific to their career)",
-    "farewell": "One italic sentence farewell"
+    "farewell": "One sentence farewell"
   },
   "identity": {
-    "creature": "1-2 sentence creature type using their tech/industry jargon",
-    "vibe": "2-3 sentences referencing their actual career path",
+    "creature": "1 sentence creature type using their tech/industry jargon",
+    "vibe": "1-2 sentences referencing their actual career path",
     "emoji": "One emoji",
     "aliases": "Name variations"
   },
   "soul": {
-    "whoYouAre": "3-4 paragraphs first-person, real companies/tools, dark humor",
-    "coreTruths": ["4-5 core beliefs, first person, specific to their work"]
+    "whoYouAre": "2 paragraphs first-person, real companies/tools, dark humor",
+    "coreTruths": ["3-4 core beliefs, first person, specific to their work"]
   }
 }`;
 }
