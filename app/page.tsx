@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { MatrixBG } from "@/components/MatrixBG";
 import { normalizeLinkedInUrl } from "@/lib/normalize-url";
@@ -9,8 +9,24 @@ export default function LandingPage() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [hovering, setHovering] = useState(false);
+  const [count, setCount] = useState(47382);
   const router = useRouter();
   const mono = "var(--font-jetbrains, 'JetBrains Mono', monospace)";
+
+  // Slowly tick the counter up — random increment every 4-10s
+  const countRef = useRef(47382);
+  useEffect(() => {
+    const tick = () => {
+      const increment = Math.floor(Math.random() * 3) + 1; // 1–3 per tick
+      countRef.current += increment;
+      setCount(countRef.current);
+      // Schedule next tick: 4–10 seconds
+      const delay = 4000 + Math.random() * 6000;
+      timer = setTimeout(tick, delay);
+    };
+    let timer = setTimeout(tick, 4000 + Math.random() * 6000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAnalyze = () => {
     const result = normalizeLinkedInUrl(url);
@@ -206,7 +222,7 @@ export default function LandingPage() {
 
           {/* Social proof counter */}
           <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,0.2)", letterSpacing: 0.5 }}>
-            47,382 professionals have checked their fate
+            {count.toLocaleString()} professionals have checked their fate
           </div>
 
           {/* Footer */}
