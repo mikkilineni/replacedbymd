@@ -10,11 +10,15 @@ export async function ensureTable(): Promise<void> {
   const sql = getSql();
   await sql`
     CREATE TABLE IF NOT EXISTS roast_cache (
-      slug        TEXT PRIMARY KEY,
+      id           BIGSERIAL PRIMARY KEY,
+      slug         TEXT NOT NULL,
       linkedin_url TEXT NOT NULL,
-      payload     JSONB NOT NULL,
-      created_at  TIMESTAMPTZ DEFAULT NOW()
+      payload      JSONB NOT NULL,
+      created_at   TIMESTAMPTZ DEFAULT NOW()
     )
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS roast_cache_slug_idx ON roast_cache (slug, created_at DESC)
   `;
 }
 
@@ -25,6 +29,7 @@ export async function getCached(slug: string): Promise<FullRoastPayload | null> 
       SELECT payload FROM roast_cache
       WHERE slug = ${slug}
         AND created_at > NOW() - INTERVAL '1 day'
+      ORDER BY created_at DESC
       LIMIT 1
     `;
     if (rows.length === 0) return null;
@@ -40,7 +45,6 @@ export async function saveCache(slug: string, linkedinUrl: string, payload: Full
     await sql`
       INSERT INTO roast_cache (slug, linkedin_url, payload)
       VALUES (${slug}, ${linkedinUrl}, ${JSON.stringify(payload)})
-      ON CONFLICT (slug) DO UPDATE SET payload = EXCLUDED.payload, created_at = NOW()
     `;
   } catch (err) {
     console.error("[db] saveCache failed:", err);
