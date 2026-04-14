@@ -68,7 +68,7 @@ function ResultsContent() {
 
     const fetchData = async () => {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 55_000);
+      const timeout = setTimeout(() => controller.abort(), 110_000);
       try {
         const res = await fetch("/api/roast", {
           method: "POST",
