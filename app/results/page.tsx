@@ -286,7 +286,7 @@ function ResultsContent() {
             (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
           }}
         >
-          ☕ BUY ME A COFFEE
+          ☕ Every check takes a Gallon of water and it costs real money to run — support if you can!
         </a>
       </div>
 
