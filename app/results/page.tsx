@@ -26,7 +26,7 @@ function buildFallback(linkedinUrl: string): FullRoastPayload {
   return coercePayload({}, linkedinUrl, slugToName(slug));
 }
 
-// ── Share helper ────────────────────────────────────────────────────────────
+// ── Share helpers ───────────────────────────────────────────────────────────
 
 function buildShareText(data: FullRoastPayload): string {
   return [
@@ -42,6 +42,12 @@ function buildShareText(data: FullRoastPayload): string {
   ].join("\n");
 }
 
+function buildTwitterText(data: FullRoastPayload): string {
+  const score = data.death_score;
+  const emoji = score >= 81 ? "💀" : score >= 61 ? "🔥" : score >= 46 ? "😬" : "😅";
+  return `just found out i'm ${score}% replaceable by AI ${emoji}\n\n"${data.eulogy.slice(0, 120)}${data.eulogy.length > 120 ? "…" : ""}"\n\nare you next? replacebymd.com`;
+}
+
 // ── Main results content ────────────────────────────────────────────────────
 
 function ResultsContent() {
@@ -51,6 +57,7 @@ function ResultsContent() {
 
   const [data, setData] = useState<FullRoastPayload | null>(null);
   const [shareHover, setShareHover] = useState(false);
+  const [twitterHover, setTwitterHover] = useState(false);
   const [tryHover, setTryHover] = useState(false);
 
   useEffect(() => {
@@ -186,10 +193,15 @@ function ResultsContent() {
 
       {/* ── 10. Actions ── */}
       <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginTop: 32 }}>
+        {/* Twitter/X share */}
         <button
-          onClick={handleShare}
-          onMouseEnter={() => setShareHover(true)}
-          onMouseLeave={() => setShareHover(false)}
+          onClick={() => {
+            if (!data) return;
+            const tweet = buildTwitterText(data);
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`, "_blank", "noopener,noreferrer");
+          }}
+          onMouseEnter={() => setTwitterHover(true)}
+          onMouseLeave={() => setTwitterHover(false)}
           style={{
             padding: "14px 36px",
             fontSize: 13,
@@ -200,12 +212,31 @@ function ResultsContent() {
             border: "none",
             borderRadius: 6,
             cursor: "pointer",
-            boxShadow: shareHover ? "0 0 40px rgba(0,255,65,0.35)" : "0 0 20px rgba(0,255,65,0.2)",
-            transform: shareHover ? "translateY(-2px)" : "translateY(0)",
+            boxShadow: twitterHover ? "0 0 40px rgba(0,255,65,0.35)" : "0 0 20px rgba(0,255,65,0.2)",
+            transform: twitterHover ? "translateY(-2px)" : "translateY(0)",
             transition: "all 0.2s",
           }}
         >
-          SHARE RESULTS
+          POST TO X →
+        </button>
+        <button
+          onClick={handleShare}
+          onMouseEnter={() => setShareHover(true)}
+          onMouseLeave={() => setShareHover(false)}
+          style={{
+            padding: "14px 36px",
+            fontSize: 13,
+            fontWeight: 600,
+            fontFamily: mono,
+            color: shareHover ? "var(--green)" : "var(--green-dim)",
+            background: "transparent",
+            border: `1px solid ${shareHover ? "var(--green)" : "var(--green-border)"}`,
+            borderRadius: 6,
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+        >
+          COPY RESULTS
         </button>
         <button
           onClick={() => router.push("/")}
