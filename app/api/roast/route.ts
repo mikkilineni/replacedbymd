@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { normalizeLinkedInUrl, slugToName } from "@/lib/normalize-url";
 import { validateFullPayload, coercePayload } from "@/lib/validate";
 import { buildSystemPrompt, buildUserPrompt } from "@/lib/prompt";
+import { getCached, saveCache, ensureTable } from "@/lib/db";
 import type { ExtractedProfile } from "@/lib/types";
 
 // Lazily constructed so the missing-key error only fires on actual requests
@@ -171,6 +172,15 @@ export async function POST(req: NextRequest) {
   const isDeep = process.env.ROAST_MODE === "deep";
   log(`url=${normalized.url} mode=${process.env.ROAST_MODE ?? "fast"} deep=${isDeep}`);
 
+  // ── Cache check ────────────────────────────────────────────────────────────
+  await ensureTable();
+  const cached = await getCached(normalized.slug);
+  if (cached) {
+    log(`cache hit for slug=${normalized.slug} — skipping Claude`);
+    return NextResponse.json(cached);
+  }
+  log(`cache miss for slug=${normalized.slug} — calling Claude`);
+
   try {
     // Optional: fetch pre-extracted profile
     const profile = await fetchExtractedProfile(normalized.url);
@@ -234,7 +244,7 @@ export async function POST(req: NextRequest) {
     if (validation.valid) {
       log("validation passed ✓ — returning clean payload");
       log("returning name:", validation.payload.name, "score:", validation.payload.death_score);
-
+      void saveCache(normalized.slug, normalized.url, validation.payload);
       return NextResponse.json(validation.payload);
     }
 
@@ -243,6 +253,7 @@ export async function POST(req: NextRequest) {
     log("raw whatLeaked:", JSON.stringify(raw.whatLeaked)?.slice(0, 200));
     log("coercing with available data...");
     const coerced = coercePayload(raw, normalized.url, fallbackName);
+    void saveCache(normalized.slug, normalized.url, coerced);
     return NextResponse.json(coerced);
   } catch (err) {
     log("unhandled error — returning fallback:", err);
