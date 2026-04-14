@@ -19,12 +19,10 @@ First-person voice clones = person at 2am being honest.
 OUTPUT: Valid JSON only. No markdown. No preamble. No trailing text.`;
 }
 
-export function buildUserPrompt(linkedinUrl: string, profile?: ExtractedProfile, webContext?: string): string {
-  const context = webContext
-    ? `RESEARCHED PROFILE:\n${webContext}`
-    : profile
+export function buildUserPrompt(linkedinUrl: string, profile?: ExtractedProfile): string {
+  const context = profile
     ? `PROFILE DATA:\n${JSON.stringify(profile, null, 2)}`
-    : `Use your knowledge of this person based on their LinkedIn URL. Infer from the URL slug, industry norms, and any public information you have.`;
+    : `Search the web for this person and use what you find. Infer from their LinkedIn URL slug, public posts, and any available signals.`;
 
   return `Analyze: ${linkedinUrl}
 
