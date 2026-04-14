@@ -22,7 +22,10 @@ export async function getCached(slug: string): Promise<FullRoastPayload | null> 
   try {
     const sql = getSql();
     const rows = await sql`
-      SELECT payload FROM roast_cache WHERE slug = ${slug} LIMIT 1
+      SELECT payload FROM roast_cache
+      WHERE slug = ${slug}
+        AND created_at > NOW() - INTERVAL '1 day'
+      LIMIT 1
     `;
     if (rows.length === 0) return null;
     return rows[0].payload as FullRoastPayload;
