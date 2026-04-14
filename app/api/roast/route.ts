@@ -121,6 +121,7 @@ async function callClaude(
 // ── POST /api/roast ──────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  console.error("[roast] POST handler invoked");
   // Parse body
   let body: unknown;
   try {
