@@ -116,11 +116,11 @@ async function callClaude(
   log(userPrompt);
   log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-  log(`[claude] model=${model} max_tokens=900`);
+  log(`[claude] model=${model} max_tokens=2000`);
 
   const response = await anthropic.messages.create({
     model,
-    max_tokens: 900,
+    max_tokens: 2000,
     system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
     messages: [
       { role: "user", content: userPrompt },
