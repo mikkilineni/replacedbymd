@@ -22,7 +22,9 @@ OUTPUT: Valid JSON only. No markdown. No preamble. No trailing text.`;
 export function buildUserPrompt(linkedinUrl: string, profile?: ExtractedProfile): string {
   const context = profile
     ? `PROFILE DATA:\n${JSON.stringify(profile, null, 2)}`
-    : `Search the web for this person and use what you find. Infer from their LinkedIn URL slug, public posts, and any available signals.`;
+    : `Search the web for the EXACT LinkedIn profile at this URL: ${linkedinUrl}
+Use web_search to look up that specific URL and find the person's actual name, job title, company, and career history.
+Do NOT guess based on the URL slug alone — search for the real profile. Use queries like site:linkedin.com/in/${linkedinUrl.split('/in/')[1]?.replace(/\//g, '')} or their full name + company from search results.`;
 
   return `Analyze: ${linkedinUrl}
 
