@@ -124,7 +124,7 @@ export default function LandingPage() {
 
           {/* Subtitle */}
           <p style={{ fontSize: 14, color: "rgba(255,255,255,0.35)", maxWidth: 420, lineHeight: 1.8, margin: "0 0 44px" }}>
-            Paste your LinkedIn URL. Find out if you can be replaced by OpenClaw. Try not to cry.
+            Paste your LinkedIn URL. Find out if you can be replaced by AI. Try not to cry.
           </p>
 
           {/* Input with icon + paste button */}
