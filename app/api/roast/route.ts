@@ -45,24 +45,67 @@ async function fetchExtractedProfile(
   }
 }
 
-// ── LLM call ────────────────────────────────────────────────────────────────
+// ── Stage 1: Sonnet + web search → profile summary ──────────────────────────
+
+async function gatherWebProfile(linkedinUrl: string): Promise<string | null> {
+  const anthropic = getAnthropic();
+  const model = process.env.CLAUDE_MODEL_DEEP ?? "claude-sonnet-4-6";
+
+  log(`[gather] model=${model} searching for ${linkedinUrl}`);
+
+  const messages: Anthropic.Messages.MessageParam[] = [{
+    role: "user",
+    content: `Search for public information about this LinkedIn profile: ${linkedinUrl}
+
+Find their name, current role, company, career history, skills, notable achievements, writing style from public posts, and any other public signals. Return a concise factual summary of everything you found.`,
+  }];
+
+  const tools = [{ type: "web_search_20250305", name: "web_search" }] as unknown as Anthropic.Messages.Tool[];
+
+  let response = await anthropic.messages.create({
+    model,
+    max_tokens: 1000,
+    tools,
+    messages,
+  });
+
+  // Handle one tool_use round
+  if (response.stop_reason === "tool_use") {
+    const toolUseBlocks = response.content.filter(
+      (b): b is Anthropic.Messages.ToolUseBlock => b.type === "tool_use",
+    );
+    messages.push({ role: "assistant", content: response.content });
+    messages.push({
+      role: "user",
+      content: toolUseBlocks.map((b) => ({
+        type: "tool_result" as const,
+        tool_use_id: b.id,
+        content: "",
+      })),
+    });
+    response = await anthropic.messages.create({ model, max_tokens: 1000, tools, messages });
+  }
+
+  const summary = response.content
+    .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+
+  log(`[gather] summary length=${summary.length}`);
+  return summary || null;
+}
+
+// ── Stage 2: Haiku + context → roast JSON ───────────────────────────────────
 
 async function callClaude(
   linkedinUrl: string,
   profile: ExtractedProfile | null,
-  deep = false,
+  webContext: string | null,
 ): Promise<string> {
   const anthropic = getAnthropic();
-  const model = deep
-    ? (process.env.CLAUDE_MODEL_DEEP ?? "claude-sonnet-4-6")
-    : (process.env.CLAUDE_MODEL ?? "claude-haiku-4-5-20251001");
-
-  const baseMessages: Anthropic.Messages.MessageParam[] = [
-    { role: "user", content: buildUserPrompt(linkedinUrl, profile ?? undefined) },
-  ];
-
+  const model = process.env.CLAUDE_MODEL ?? "claude-haiku-4-5-20251001";
   const systemPrompt = buildSystemPrompt();
-  const userPrompt = buildUserPrompt(linkedinUrl, profile ?? undefined);
+  const userPrompt = buildUserPrompt(linkedinUrl, profile ?? undefined, webContext ?? undefined);
 
   log("━━━ SYSTEM PROMPT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   log(systemPrompt);
@@ -70,80 +113,30 @@ async function callClaude(
   log(userPrompt);
   log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-  const runWithTools = async (useWebSearch: boolean): Promise<string> => {
-    const tools = useWebSearch
-      ? ([{ type: "web_search_20250305", name: "web_search" }] as unknown as Anthropic.Messages.Tool[])
-      : [];
+  log(`[claude] model=${model} max_tokens=900`);
 
-    log(`[claude] model=${model} web_search=${useWebSearch} max_tokens=8192`);
+  const response = await anthropic.messages.create({
+    model,
+    max_tokens: 900,
+    system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
+    messages: [
+      { role: "user", content: userPrompt },
+      { role: "assistant", content: "{" }, // force JSON start
+    ],
+  });
 
-    // Prefill assistant turn with "{" when NOT using web_search — forces haiku to
-    // start JSON immediately instead of writing prose preamble first.
-    const messages: Anthropic.Messages.MessageParam[] = useWebSearch
-      ? [...baseMessages]
-      : [...baseMessages, { role: "assistant", content: "{" }];
+  const rawText = response.content
+    .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
 
-    const createParams: Anthropic.Messages.MessageCreateParamsNonStreaming = {
-      model,
-      max_tokens: 900,
-      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
-      messages,
-      ...(tools.length > 0 ? { tools } : {}),
-    };
+  const text = "{" + rawText;
 
-    let response = await anthropic.messages.create(createParams);
-    log(`[claude] stop_reason=${response.stop_reason} content_blocks=${response.content.length}`);
+  log("━━━ RAW CLAUDE OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  log(text);
+  log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-    // Handle tool_use rounds
-    let rounds = 0;
-    const turnMessages = createParams.messages as Anthropic.Messages.MessageParam[];
-
-    while (response.stop_reason === "tool_use" && rounds < 1) {
-      rounds++;
-      const toolUseBlocks = response.content.filter(
-        (b): b is Anthropic.Messages.ToolUseBlock => b.type === "tool_use",
-      );
-      log(`[claude] tool_use round ${rounds} — tools: ${toolUseBlocks.map(b => b.name).join(", ")}`);
-      turnMessages.push({ role: "assistant", content: response.content });
-      turnMessages.push({
-        role: "user",
-        content: toolUseBlocks.map((b) => ({
-          type: "tool_result" as const,
-          tool_use_id: b.id,
-          content: "",
-        })),
-      });
-      response = await anthropic.messages.create({ ...createParams, messages: turnMessages });
-      log(`[claude] round ${rounds} response: stop_reason=${response.stop_reason} blocks=${response.content.length}`);
-    }
-
-    const rawText = response.content
-      .filter((b): b is Anthropic.Messages.TextBlock => b.type === "text")
-      .map((b) => b.text)
-      .join("");
-
-    // Re-attach the prefilled "{" since the model continues from after it
-    const text = useWebSearch ? rawText : "{" + rawText;
-
-    log("━━━ RAW CLAUDE OUTPUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    log(text);
-    log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-
-    return text;
-  };
-
-  // Only use web_search in deep mode — haiku doesn't support it and wastes a round-trip
-  const supportsWebSearch = deep;
-
-  if (!profile && supportsWebSearch) {
-    try {
-      return await runWithTools(true);
-    } catch (err) {
-      log("web_search failed, retrying without it:", String(err));
-    }
-  }
-
-  return runWithTools(false);
+  return text;
 }
 
 // ── POST /api/roast ──────────────────────────────────────────────────────────
@@ -185,10 +178,20 @@ export async function POST(req: NextRequest) {
     // Optional: fetch pre-extracted profile
     const profile = await fetchExtractedProfile(normalized.url);
 
-    // Call Claude
+    // Stage 1 (deep mode): Sonnet + web search → profile summary
+    let webContext: string | null = null;
+    if (isDeep && !profile) {
+      try {
+        webContext = await gatherWebProfile(normalized.url);
+      } catch (err) {
+        log("web profile gather failed, continuing without it:", String(err));
+      }
+    }
+
+    // Stage 2: Haiku → roast JSON
     let rawText: string;
     try {
-      rawText = await callClaude(normalized.url, profile, isDeep);
+      rawText = await callClaude(normalized.url, profile, webContext);
     } catch (apiErr) {
       console.error("[roast] Claude API error:", apiErr);
       if (isDev) {
