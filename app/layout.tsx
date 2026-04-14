@@ -36,7 +36,7 @@ export default function RootLayout({
             __html: `
               kofiWidgetOverlay.draw('sunilmikkilineni', {
                 'type': 'floating-chat',
-                'floating-chat.donateButton.text': 'This costs real $',
+                'floating-chat.donateButton.text': 'Support .MD',
                 'floating-chat.donateButton.background-color': '#00b9fe',
                 'floating-chat.donateButton.text-color': '#fff'
               });
