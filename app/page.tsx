@@ -119,7 +119,7 @@ export default function LandingPage() {
             }}
           >
             <span style={{ color: "var(--green)", textShadow: "0 0 40px rgba(0,255,65,0.3), 0 0 80px rgba(0,255,65,0.1)" }}>Replace</span>
-            <span style={{ color: "#fff" }}>ByMd</span>
+            <span style={{ color: "#fff" }}>By.md</span>
           </h1>
 
           {/* Subtitle */}

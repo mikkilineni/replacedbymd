@@ -30,7 +30,7 @@ function buildFallback(linkedinUrl: string): FullRoastPayload {
 
 function buildShareText(data: FullRoastPayload): string {
   return [
-    "replacebymd // replacement report",
+    "replacedby.md // replacement report",
     "",
     `${data.name} — ${data.title}`,
     `${data.death_score}/100`,
@@ -45,7 +45,7 @@ function buildShareText(data: FullRoastPayload): string {
 function buildTwitterText(data: FullRoastPayload): string {
   const score = data.death_score;
   const emoji = score >= 81 ? "💀" : score >= 61 ? "🔥" : score >= 46 ? "😬" : "😅";
-  return `just found out i'm ${score}% replaceable by AI ${emoji}\n\n"${data.eulogy.slice(0, 120)}${data.eulogy.length > 120 ? "…" : ""}"\n\nare you next? replacebymd.com`;
+  return `just found out i'm ${score}% replaceable by AI ${emoji}\n\n"${data.eulogy.slice(0, 120)}${data.eulogy.length > 120 ? "…" : ""}"\n\nare you next? replacedby.md.com`;
 }
 
 // ── Main results content ────────────────────────────────────────────────────
@@ -111,7 +111,7 @@ function ResultsContent() {
 
       {/* Header */}
       <div style={{ fontSize: 12, color: "var(--green-dim)", letterSpacing: 2, marginBottom: 32, fontFamily: mono }}>
-        replacebymd // replacement report
+        replacedby.md // replacement report
       </div>
 
       {/* ── 1. Profile + Verdict ── */}

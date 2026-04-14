@@ -11,11 +11,11 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ReplaceByMd — Are you just a system prompt?",
+  title: "ReplacedBy.md — Are you just a system prompt?",
   description:
     "Paste your LinkedIn URL. Find out if you can be replaced by AI. Try not to cry.",
   openGraph: {
-    title: "ReplaceByMd",
+    title: "ReplacedBy.md",
     description: "Find out how replaceable you are by AI.",
     type: "website",
   },
