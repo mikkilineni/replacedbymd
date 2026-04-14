@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
   log(`url=${normalized.url} model=${process.env.CLAUDE_MODEL ?? "claude-sonnet-4-6"}`);
 
   // ── Cache check ────────────────────────────────────────────────────────────
-  await ensureTable();
+  try { await ensureTable(); } catch (dbErr) { console.error("[roast] ensureTable failed:", dbErr); }
   const cached = await getCached(normalized.slug);
   if (cached) {
     log(`cache hit for slug=${normalized.slug} — skipping Claude`);
@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
     void saveCache(normalized.slug, normalized.url, coerced);
     return NextResponse.json(coerced);
   } catch (err) {
-    log("unhandled error — returning fallback:", err);
+    console.error("[roast] unhandled error — returning fallback:", err);
     const fallback = coercePayload({}, normalized.url, fallbackName);
     return NextResponse.json(fallback);
   }
