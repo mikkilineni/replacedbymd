@@ -30,10 +30,7 @@ export default function LandingPage() {
       timer = setTimeout(tick, 4000 + Math.random() * 6000);
     };
 
-    fetch("https://api.countapi.xyz/get/replacebymd/roasts")
-      .then((r) => r.json())
-      .then((data: { value: number }) => startTicking(data.value ?? 47382))
-      .catch(() => startTicking(47382));
+    startTicking(47382);
 
     return () => clearTimeout(timer);
   }, []);
