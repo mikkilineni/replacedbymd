@@ -67,12 +67,16 @@ function ResultsContent() {
     }
 
     const fetchData = async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 55_000);
       try {
         const res = await fetch("/api/roast", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ linkedinUrl }),
+          signal: controller.signal,
         });
+        clearTimeout(timeout);
         const payload = await res.json();
         // Dev 502 returns { error: "..." } — surface it in console, use fallback
         if (!res.ok || payload.error) {
@@ -83,6 +87,7 @@ function ResultsContent() {
         console.log("[results] received payload:", payload.name, "score:", payload.death_score);
         setData(payload);
       } catch {
+        clearTimeout(timeout);
         setData(buildFallback(linkedinUrl));
       }
     };
