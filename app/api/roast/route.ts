@@ -84,8 +84,8 @@ async function callClaude(
 
     const createParams: Anthropic.Messages.MessageCreateParamsNonStreaming = {
       model,
-      max_tokens: 1500,
-      system: systemPrompt,
+      max_tokens: 900,
+      system: [{ type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } }],
       messages,
       ...(tools.length > 0 ? { tools } : {}),
     };
@@ -97,7 +97,7 @@ async function callClaude(
     let rounds = 0;
     const turnMessages = createParams.messages as Anthropic.Messages.MessageParam[];
 
-    while (response.stop_reason === "tool_use" && rounds < 2) {
+    while (response.stop_reason === "tool_use" && rounds < 1) {
       rounds++;
       const toolUseBlocks = response.content.filter(
         (b): b is Anthropic.Messages.ToolUseBlock => b.type === "tool_use",
