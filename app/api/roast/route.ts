@@ -10,6 +10,11 @@ function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
 
+// Fire-and-forget counter increment — never throws
+function hitCounter() {
+  fetch("https://api.countapi.xyz/hit/replacebymd/roasts").catch(() => {});
+}
+
 // Verbose logger — always on in dev, silent in prod unless VERBOSE_ROAST=1
 const VERBOSE = process.env.NODE_ENV === "development" || process.env.VERBOSE_ROAST === "1";
 function log(...args: unknown[]) {
@@ -233,6 +238,7 @@ export async function POST(req: NextRequest) {
     if (validation.valid) {
       log("validation passed ✓ — returning clean payload");
       log("returning name:", validation.payload.name, "score:", validation.payload.death_score);
+      hitCounter();
       return NextResponse.json(validation.payload);
     }
 
@@ -241,6 +247,7 @@ export async function POST(req: NextRequest) {
     log("raw whatLeaked:", JSON.stringify(raw.whatLeaked)?.slice(0, 200));
     log("coercing with available data...");
     const coerced = coercePayload(raw, normalized.url, fallbackName);
+    hitCounter();
     return NextResponse.json(coerced);
   } catch (err) {
     log("unhandled error — returning fallback:", err);

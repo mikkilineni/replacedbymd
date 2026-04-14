@@ -9,22 +9,32 @@ export default function LandingPage() {
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [hovering, setHovering] = useState(false);
-  const [count, setCount] = useState(47382);
+  const [count, setCount] = useState<number | null>(null);
   const router = useRouter();
   const mono = "var(--font-jetbrains, 'JetBrains Mono', monospace)";
 
-  // Slowly tick the counter up — random increment every 4-10s
-  const countRef = useRef(47382);
+  // Fetch real count, then tick slowly for visual engagement
+  const countRef = useRef(0);
   useEffect(() => {
-    const tick = () => {
-      const increment = Math.floor(Math.random() * 3) + 1; // 1–3 per tick
-      countRef.current += increment;
-      setCount(countRef.current);
-      // Schedule next tick: 4–10 seconds
-      const delay = 4000 + Math.random() * 6000;
-      timer = setTimeout(tick, delay);
+    let timer: ReturnType<typeof setTimeout>;
+
+    const startTicking = (base: number) => {
+      countRef.current = base;
+      setCount(base);
+      const tick = () => {
+        const increment = Math.floor(Math.random() * 3) + 1;
+        countRef.current += increment;
+        setCount(countRef.current);
+        timer = setTimeout(tick, 4000 + Math.random() * 6000);
+      };
+      timer = setTimeout(tick, 4000 + Math.random() * 6000);
     };
-    let timer = setTimeout(tick, 4000 + Math.random() * 6000);
+
+    fetch("https://api.countapi.xyz/get/replacebymd/roasts")
+      .then((r) => r.json())
+      .then((data: { value: number }) => startTicking(data.value ?? 47382))
+      .catch(() => startTicking(47382));
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -221,8 +231,8 @@ export default function LandingPage() {
           </button>
 
           {/* Social proof counter */}
-          <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,0.2)", letterSpacing: 0.5 }}>
-            {count.toLocaleString()} professionals have checked their fate
+          <div style={{ marginTop: 16, fontSize: 12, color: "rgba(255,255,255,0.2)", letterSpacing: 0.5, minHeight: 18 }}>
+            {count !== null && `${count.toLocaleString()} professionals have checked their fate`}
           </div>
 
           {/* Footer */}
