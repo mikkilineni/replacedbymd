@@ -62,12 +62,12 @@ Find their name, current role, company, career history, skills, notable achievem
 
   const tools = [{ type: "web_search_20250305", name: "web_search" }] as unknown as Anthropic.Messages.Tool[];
 
-  let response = await anthropic.messages.create({
-    model,
-    max_tokens: 1000,
-    tools,
-    messages,
-  });
+  const signal = AbortSignal.timeout(25_000);
+
+  let response = await anthropic.messages.create(
+    { model, max_tokens: 1000, tools, messages },
+    { signal },
+  );
 
   // Handle one tool_use round
   if (response.stop_reason === "tool_use") {
@@ -83,7 +83,10 @@ Find their name, current role, company, career history, skills, notable achievem
         content: "",
       })),
     });
-    response = await anthropic.messages.create({ model, max_tokens: 1000, tools, messages });
+    response = await anthropic.messages.create(
+      { model, max_tokens: 1000, tools, messages },
+      { signal },
+    );
   }
 
   const summary = response.content
