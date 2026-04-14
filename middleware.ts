@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const MAX_REQUESTS = 3;
+const MAX_REQUESTS = parseInt(process.env.RATE_LIMIT_MAX ?? "3", 10);
 
 // In-memory store — persists for the lifetime of the edge instance
 // Not shared across regions/instances, but a meaningful deterrent against abuse
