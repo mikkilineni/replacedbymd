@@ -13,7 +13,7 @@ export default function LandingPage() {
   const router = useRouter();
   const mono = "var(--font-jetbrains, 'JetBrains Mono', monospace)";
 
-  // Fetch real count, then tick slowly for visual engagement
+  // Fetch real count from DB, then tick slowly for visual engagement
   const countRef = useRef(0);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
@@ -30,7 +30,10 @@ export default function LandingPage() {
       timer = setTimeout(tick, 4000 + Math.random() * 6000);
     };
 
-    startTicking(47382);
+    fetch("/api/count")
+      .then((r) => r.json())
+      .then((d) => startTicking(d.count ?? 0))
+      .catch(() => startTicking(0));
 
     return () => clearTimeout(timer);
   }, []);
