@@ -28,6 +28,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={jetbrainsMono.variable}>
+      <head>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-P9QWH0378K" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-P9QWH0378K');`,
+          }}
+        />
+      </head>
       <body className="antialiased">
         {children}
         <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js" />
