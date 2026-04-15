@@ -11,13 +11,34 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ReplacedBy.md — Are you just a system prompt?",
+  title: "ReplacedBy.md — Will AI Replace Your Job?",
   description:
-    "Paste your LinkedIn URL. Find out if you can be replaced by AI. Try not to cry.",
+    "Find out if AI can replace your job. Paste your LinkedIn URL and get a brutally honest AI replacement score, cause of death, and retirement certificate.",
+  keywords: [
+    "will AI replace my job",
+    "AI job replacement",
+    "am I replaceable by AI",
+    "AI automation score",
+    "LinkedIn AI analysis",
+    "will AI take my job",
+    "job automation risk",
+  ],
   openGraph: {
-    title: "ReplacedBy.md",
-    description: "Find out how replaceable you are by AI.",
+    title: "ReplacedBy.md — Will AI Replace Your Job?",
+    description:
+      "Paste your LinkedIn URL. Get your AI replacement score, cause of death, and retirement certificate. Try not to cry.",
     type: "website",
+    url: "https://www.replacedby.md",
+    siteName: "ReplacedBy.md",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ReplacedBy.md — Will AI Replace Your Job?",
+    description:
+      "Paste your LinkedIn URL. Get your AI replacement score, cause of death, and retirement certificate.",
+  },
+  alternates: {
+    canonical: "https://www.replacedby.md",
   },
 };
 
