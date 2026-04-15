@@ -12,8 +12,8 @@ function getAnthropic() {
 }
 
 
-// Verbose logger — always on in dev, silent in prod unless VERBOSE_ROAST=1
-const VERBOSE = process.env.NODE_ENV === "development" || process.env.VERBOSE_ROAST === "1";
+// Verbose logger — dev only; VERBOSE_ROAST=1 has no effect in production
+const VERBOSE = process.env.NODE_ENV !== "production" && process.env.VERBOSE_ROAST === "1";
 function log(...args: unknown[]) {
   if (VERBOSE) console.log("[roast]", ...args);
 }

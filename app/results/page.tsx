@@ -45,7 +45,7 @@ function buildShareText(data: FullRoastPayload): string {
 function buildTwitterText(data: FullRoastPayload): string {
   const score = data.death_score;
   const emoji = score >= 81 ? "💀" : score >= 61 ? "🔥" : score >= 46 ? "😬" : "😅";
-  return `just found out i'm ${score}% replaceable by AI ${emoji}\n\n"${data.eulogy.slice(0, 120)}${data.eulogy.length > 120 ? "…" : ""}"\n\nare you next? replacedby.md.com`;
+  return `just found out i'm ${score}% replaceable by AI ${emoji}\n\n"${data.eulogy.slice(0, 120)}${data.eulogy.length > 120 ? "…" : ""}"\n\nare you next? replacedby.md`;
 }
 
 // ── Main results content ────────────────────────────────────────────────────
