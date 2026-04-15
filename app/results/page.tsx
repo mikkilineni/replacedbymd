@@ -133,6 +133,9 @@ function ResultsContent() {
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 4, wordBreak: "break-all", fontFamily: mono }}>
               {data.linkedinUrl}
             </div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 6, fontFamily: mono }}>
+              ⚠ profile data sourced from public web · accuracy may vary
+            </div>
           </div>
         </div>
         <p style={{ fontSize: "clamp(16px, 3.5vw, 22px)", fontWeight: 700, color: "#fff", lineHeight: 1.5, margin: "20px 0 0", fontFamily: mono }}>
